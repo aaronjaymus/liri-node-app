@@ -1,0 +1,35 @@
+{
+  "name": "liri-node-app",
+  "version": "0.1.0",
+  "description": "Use Liri to go get twitter, spotify, and movie stuff from the command line!",
+  "main": "liri.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aaronjaymus/liri-node-app.git"
+  },
+  "keywords": [
+    "liri",
+    "spotify",
+    "twitter",
+    "omdb",
+    "movie",
+    "music",
+    "song",
+    "tweet"
+  ],
+  "author": "A. James McHale",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aaronjaymus/liri-node-app/issues"
+  },
+  "homepage": "https://github.com/aaronjaymus/liri-node-app#readme",
+  "dependencies": {
+    "inquirer": "^3.0.1",
+    "omdb": "^0.7.0",
+    "spotify": "^0.3.0",
+    "twitter": "^1.7.0"
+  }
+}

@@ -1,9 +1,6 @@
 var inquirer = require('inquirer');
 
-//myTweets();
-//spotifyThis();
-//movieThis();
-//randomTxt();
+var fs = require('fs');
 
 inquirer.prompt([
 		{
@@ -15,6 +12,26 @@ inquirer.prompt([
 	]).then(function(answers){
 		chooseTask(answers.doThis);
 	});
+
+function chooseTask (task, search) {
+	switch(task){
+		case 'my-tweets':
+			myTweets();
+			break;
+		case 'spotify-this-song':
+			spotifyThis(search);
+			break;
+		case 'movie-this':
+			movieThis(search);	
+			break;
+		case 'do-what-it-says':
+			randomTxt();
+			break;
+		default: 
+			console.log('Milk was a bad choice');
+			break;		
+		}
+}
 
 function myTweets(){
 	//Get the twitter keys
@@ -36,79 +53,120 @@ function myTweets(){
 	var params = {screen_name: 'aaronjaymus'};
 	client.get('statuses/user_timeline', params, function(error, tweets, response) {
 	  if (!error) {
-	    console.log(tweets);
+	    for(var i=0; i < 20; i++){
+	    	console.log(tweets[i].user.screen_name);
+	    	console.log(tweets[i].created_at);
+	    	console.log(tweets[i].text);	    	
+	    	console.log('====================================================');
+
+	    }
 	  } else if(error){
 	  	console.log(error);
 	  }
 	});
 }
 
-function chooseTask (task) {
-	switch(task){
-		case 'my-tweets':
-			myTweets();
-			break;
-		case 'spotify-this-song':
-			spotifyThis();
-			break;
-		case 'movie-this':
-			movieThis();	
-			break;
-		case 'do-what-it-says':
-			randomTxt();
-			break;
-		default: 
-			console.log('Milk was a bad choice');
-			break;		
-		}
-}
-
-function spotifyThis() {
+function spotifyThis(search) {
 	var spotify = require('spotify');
 
-	inquirer.prompt([
-			{
-				type: 'text',
-				message: 'What song are you looking for?',
-				name: 'songName',
-				default: 'I want it that way'
-			}
-		]).then(function(answers){
+	var song = search;
 
-			spotify.search({ type: 'track', query: answers.songName}, function(error, data){
-				if(!error){
-					console.log(JSON.stringify(data, null, 2));
-				} else if (error) {
-					console.log(error);
+	if(song === undefined) {
+		inquirer.prompt([
+				{
+					type: 'text',
+					message: 'What song are you looking for?',
+					name: 'songName',
+					default: 'The sign'
 				}
+			]).then(function(answers){
+
+				spotify.search({ type: 'track', query: answers.songName}, function(error, data){
+					var tracks = data.tracks.items;
+					if(!error){
+						for(var i=0; i<tracks.length; i++){
+							console.log("Artist: "+tracks[i].artists[0].name);
+							console.log("Song name: "+tracks[i].name);
+							console.log("Album: "+tracks[i].album.name);
+							console.log("URL: "+tracks[i].href);
+							console.log("===============================================");
+						}
+					} else if (error) {
+						console.log(error);
+					}
+				});
 			});
-		});
+	} else {
+		spotify.search({ type: 'track', query: song}, function(error, data){
+			var tracks = data.tracks.items;
+			if(!error){
+				for(var i=0; i<tracks.length; i++){
+					console.log("Artist: "+tracks[i].artists[0].name);
+					console.log("Song name: "+tracks[i].name);
+					console.log("Album: "+tracks[i].album.name);
+					console.log("URL: "+tracks[i].href);
+					console.log("===============================================");
+				}				
+			} else if (error) {
+				console.log(error);
+			}
+		});		
+	}
 } 
 
-function movieThis() {
-	console.log("Movie this");
+function movieThis(search) {
+
 	var omdb = require('omdb');
 
-	omdb.search('saw', function(error, data){
-		if(error){
-			return console.log(error);
-		}
+	var thisMovie = search;
 
-		if(movies.length<1){
-			return console.log("No movies were found!");
-		}
+	if(thisMovie === undefined){
+		inquirer.prompt([
+				{
+					type: 'text',
+					message: 'What movie are you looking for?',
+					name: 'movieName',
+					default: 'Mr. Nobody'
+				}
+			]).then(function(answers){
+				omdb.search(answers.movieName, function(error, data){
+					if(error){
+						return console.log(error);
+					}
 
-		movies.forEach(function(movie){
-			console.log(movie.title, movie.year, movie.imdb.rating);
-			console.log(movie.plot);
+					if(movies.length<1){
+						return console.log("No movies were found!");
+					}
+
+					movies.forEach(function(movie){
+						console.log(movie.title, movie.year, movie.imdb.rating);
+						console.log(movie.plot);
+					});
+				});
 		});
-	});
+	} else {
+		omdb.search(thisMovie, function(error, data){
+				if(error){
+					return console.log(error);
+				}
+
+				if(movies.length<1){
+					return console.log("No movies were found!");
+				}
+
+				movies.forEach(function(movie){
+					console.log(movie.title, movie.year, movie.imdb.rating);
+					console.log(movie.plot);
+				});
+			});
+	}
 }
 
 function randomTxt () {
-	var fs = require('fs');
 
 	fs.readFile("random.txt", "utf8", function(error, data){
-		console.log(data);
+		var task = data.substring(0, data.indexOf(','));
+		var search = data.split(',').pop();
+		chooseTask(task, search);
 	});
 }

@@ -14,6 +14,13 @@ inquirer.prompt([
 	});
 
 function chooseTask (task, search) {
+	var d = new Date();
+	fs.appendFile('log.txt', "Task: "+task+"\n"+d+"\n<<<<<<<<<<<<>>>>>>>>>>>>\n",
+		function(err, info){
+			if(err){
+				console.log(err);
+			}
+		});
 	switch(task){
 		case 'my-tweets':
 			myTweets();
@@ -54,6 +61,16 @@ function myTweets(){
 	client.get('statuses/user_timeline', params, function(error, tweets, response) {
 	  if (!error) {
 	    for(var i=0; i < 20; i++){
+	    	fs.appendFile('log.txt', 
+	    		tweets[i].user.screen_name+"\n"+
+	    		tweets[i].created_at+"\n"+
+	    		tweets[i].text+"\n"+
+	    		"================================\n", 
+				function(err, data){
+		    		if(err){
+		    			console.log(err);
+		    		}
+	     	});
 	    	console.log(tweets[i].user.screen_name);
 	    	console.log(tweets[i].created_at);
 	    	console.log(tweets[i].text);	    	
@@ -66,7 +83,7 @@ function myTweets(){
 	});
 }
 
-function spotifyThis(search) {
+function spotifyThis(search) { 	
 	var spotify = require('spotify');
 
 	var song = search;
@@ -85,6 +102,17 @@ function spotifyThis(search) {
 					var tracks = data.tracks.items;
 					if(!error){
 						for(var i=0; i<tracks.length; i++){
+							fs.appendFile('log.txt',
+								"Artist: "+tracks[i].artists[0].name+"\n"+
+								"Song name: "+tracks[i].name+"\n"+
+								"Album: "+tracks[i].album.name+"\n"+
+								"URL: "+tracks.href+"\n"+
+								"=================================\n",
+							function(err, data){
+								if(err){
+									console.log(err);
+								}
+							});	
 							console.log("Artist: "+tracks[i].artists[0].name);
 							console.log("Song name: "+tracks[i].name);
 							console.log("Album: "+tracks[i].album.name);
@@ -97,10 +125,21 @@ function spotifyThis(search) {
 				});
 			});
 	} else {
-		spotify.search({ type: 'track', query: song}, function(error, data){
+		spotify.search({ type: 'track', query: search}, function(error, data){
 			var tracks = data.tracks.items;
 			if(!error){
 				for(var i=0; i<tracks.length; i++){
+					fs.appendFile('log.txt',
+						"Artist: "+tracks[i].artists[0].name+"\n"+
+						"Song name: "+tracks[i].name+"\n"+
+						"Album: "+tracks[i].album.name+"\n"+
+						"URL: "+tracks.href+"\n"+
+						"=================================\n",
+						function(err, data){
+							if(err){
+								console.log(err);
+							}
+						});
 					console.log("Artist: "+tracks[i].artists[0].name);
 					console.log("Song name: "+tracks[i].name);
 					console.log("Album: "+tracks[i].album.name);
@@ -116,7 +155,7 @@ function spotifyThis(search) {
 
 function movieThis(search) {
 
-	var omdb = require('omdb');
+	var movie = require('node-movie');
 
 	var thisMovie = search;
 
@@ -129,41 +168,72 @@ function movieThis(search) {
 					default: 'Mr. Nobody'
 				}
 			]).then(function(answers){
-				omdb.search(answers.movieName, function(error, data){
-					if(error){
-						return console.log(error);
+				movie(answers.movieName, function(err, data){
+					if(err){
+						console.log(err);
+					}else{
+						fs.appendFile('log.txt',
+							"Title: "+ data.Title +"\n"+
+							"Year: "+ data.Year +"\n"+ 
+							"IMDB Rating: "+ data.imdbRating +"\n"+
+							"Country: "+ data.Country +"\n"+
+							"Language: "+ data.Language +"\n"+
+							"Actors: " + data.Actors +"\n"+
+							"Plot: " + data.Plot + "\n" +
+							"====================================================\n",
+							function(error, info){
+								if(error){
+									console.log(error);
+								}
+							});
+						console.log(
+							"Title: "+ data.Title +"\n"+
+							"Year: "+ data.Year +"\n"+ 
+							"IMDB Rating: "+ data.imdbRating +"\n"+
+							"Country: "+ data.Country +"\n"+
+							"Language: "+ data.Language +"\n"+
+							"Actors: " + data.Actors +"\n"+
+							"Plot: " + data.Plot + "\n" +
+							"======================================================"
+							);
 					}
-
-					if(movies.length<1){
-						return console.log("No movies were found!");
-					}
-
-					movies.forEach(function(movie){
-						console.log(movie.title, movie.year, movie.imdb.rating);
-						console.log(movie.plot);
-					});
 				});
 		});
 	} else {
-		omdb.search(thisMovie, function(error, data){
-				if(error){
-					return console.log(error);
-				}
-
-				if(movies.length<1){
-					return console.log("No movies were found!");
-				}
-
-				movies.forEach(function(movie){
-					console.log(movie.title, movie.year, movie.imdb.rating);
-					console.log(movie.plot);
+		movie(thisMovie, function(err, data){
+			if(err){
+				console.log(err);
+			}else{
+				fs.appendFile('log.txt',
+						"Title: "+ data.Title +"\n"+
+						"Year: "+ data.Year +"\n"+ 
+						"IMDB Rating: "+ data.imdbRating +"\n"+
+						"Country: "+ data.Country +"\n"+
+						"Language: "+ data.Language +"\n"+
+						"Actors: " + data.Actors +"\n"+
+						"Plot: " + data.Plot + "\n" +
+						"====================================================\n",
+				function(error, info){
+					if(error){
+						console.log(error);
+					}
 				});
-			});
+				console.log(
+					"Title: "+ data.Title +"\n"+
+					"Year: "+ data.Year +"\n"+ 
+					"IMDB Rating: "+ data.imdbRating +"\n"+
+					"Country: "+ data.Country +"\n"+
+					"Language: "+ data.Language +"\n"+
+					"Actors: " + data.Actors +"\n"+
+					"Plot: " + data.Plot + "\n" +
+					"====================================================="
+					);
+			}
+		});
 	}
 }
 
 function randomTxt () {
-
 	fs.readFile("random.txt", "utf8", function(error, data){
 		var task = data.substring(0, data.indexOf(','));
 		var search = data.split(',').pop();
